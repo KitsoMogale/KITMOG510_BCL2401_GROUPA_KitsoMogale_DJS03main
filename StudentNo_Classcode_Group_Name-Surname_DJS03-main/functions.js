@@ -60,3 +60,55 @@ export const openModal = (target)=>{
            }
        )
 }
+
+
+
+export const themeChange = () =>{
+    if (theme === 'night') {
+        document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
+        document.documentElement.style.setProperty('--color-light', '10, 10, 20');
+    } else {
+        document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
+        document.documentElement.style.setProperty('--color-light', '255, 255, 255');
+    }
+
+}
+
+export const searchedBooks = (filters,result) =>{
+    for (const book of books) {
+        let genreMatch = filters.genre === 'any'
+
+        for (const singleGenre of book.genres) {
+            if (genreMatch) break;
+            if (singleGenre === filters.genre) { genreMatch = true }
+        }
+
+        if (
+            (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) && 
+            (filters.author === 'any' || book.author === filters.author) && 
+            genreMatch
+        ) {
+            result.push(book)
+        }
+    }
+
+}
+
+
+export  const abstraction = (patharray,active)=>{
+           for (const node of patharray) {
+               if (active) break
+
+                  if (node?.dataset?.preview) {
+                 let result = null
+    
+                for (const singleBook of books) {
+                if (result) break;
+                if (singleBook.id === node?.dataset?.preview) result = singleBook
+                  } 
+          
+            active = result
+               }
+           }
+
+        }

@@ -1,5 +1,5 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
-import { displayBooks,options,openModal } from './functions.js';
+import { displayBooks,options,openModal, themeChange, searchedBooks, abstraction } from './functions.js';
 
 let page = 1;
 let matches = books
@@ -51,13 +51,7 @@ document.querySelector('[data-settings-form]').addEventListener('submit', (event
     const formData = new FormData(event.target)
     const { theme } = Object.fromEntries(formData)
 
-    if (theme === 'night') {
-        document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
-        document.documentElement.style.setProperty('--color-light', '10, 10, 20');
-    } else {
-        document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
-        document.documentElement.style.setProperty('--color-light', '255, 255, 255');
-    }
+    themeChange();
     
     document.querySelector('[data-settings-overlay]').open = false
 })
@@ -68,22 +62,7 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
     const filters = Object.fromEntries(formData)
     const result = []
 
-    for (const book of books) {
-        let genreMatch = filters.genre === 'any'
-
-        for (const singleGenre of book.genres) {
-            if (genreMatch) break;
-            if (singleGenre === filters.genre) { genreMatch = true }
-        }
-
-        if (
-            (filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase())) && 
-            (filters.author === 'any' || book.author === filters.author) && 
-            genreMatch
-        ) {
-            result.push(book)
-        }
-    }
+    searchedBooks(filters,result)
 
     page = 1;
     matches = result
@@ -140,20 +119,7 @@ document.querySelector('[data-list-items]').addEventListener('click', (event) =>
     const pathArray = Array.from(event.path || event.composedPath())
     let active = null
 
-    for (const node of pathArray) {
-        if (active) break
-
-        if (node?.dataset?.preview) {
-            let result = null
-    
-            for (const singleBook of books) {
-                if (result) break;
-                if (singleBook.id === node?.dataset?.preview) result = singleBook
-            } 
-        
-            active = result
-        }
-    }
+     abstraction(pathArray,active)
     
     if (active) {
         document.querySelector('[data-list-active]').open = true
