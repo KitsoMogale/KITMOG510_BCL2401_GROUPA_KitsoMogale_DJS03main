@@ -1,64 +1,15 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
+import { displayBooks,options,openModal } from './functions.js';
 
 let page = 1;
 let matches = books
 
-const starting = document.createDocumentFragment()
-
-const displayBooks = (listOfBooks)=>{
-for (const { author, id, image, title } of listOfBooks.slice(0, BOOKS_PER_PAGE)) {
-    const element = document.createElement('button')
-    element.classList = 'preview'
-    element.setAttribute('data-preview', id)
-
-    element.innerHTML = `
-        <img
-            class="preview__image"
-            src="${image}"
-        />
-        
-        <div class="preview__info">
-            <h3 class="preview__title">${title}</h3>
-            <div class="preview__author">${authors[author]}</div>
-        </div>
-    `
-
-    starting.appendChild(element)
-}
-
-document.querySelector('[data-list-items]').appendChild(starting)
-}
-
 displayBooks(matches);
-const genreHtml = document.createDocumentFragment()
-const firstGenreElement = document.createElement('option')
-firstGenreElement.value = 'any'
-firstGenreElement.innerText = 'All Genres'
-genreHtml.appendChild(firstGenreElement)
 
-for (const [id, name] of Object.entries(genres)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    genreHtml.appendChild(element)
-}
+options(genres,'[data-search-genres]','All Genres')
 
-document.querySelector('[data-search-genres]').appendChild(genreHtml)
+options(authors,'[data-search-authors]','All Authors')
 
-const authorsHtml = document.createDocumentFragment()
-const firstAuthorElement = document.createElement('option')
-firstAuthorElement.value = 'any'
-firstAuthorElement.innerText = 'All Authors'
-authorsHtml.appendChild(firstAuthorElement)
-
-for (const [id, name] of Object.entries(authors)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    authorsHtml.appendChild(element)
-}
-
-document.querySelector('[data-search-authors]').appendChild(authorsHtml)
 
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector('[data-settings-theme]').value = 'night'
@@ -78,25 +29,21 @@ document.querySelector('[data-list-button]').innerHTML = `
     <span class="list__remaining"> (${(matches.length - (page * BOOKS_PER_PAGE)) > 0 ? (matches.length - (page * BOOKS_PER_PAGE)) : 0})</span>
 `
 
-document.querySelector('[data-search-cancel]').addEventListener('click', () => {
-    document.querySelector('[data-search-overlay]').open = false
-})
+//array of objects with key as target element to add an eventlistener to 
+const targetElements = [
 
-document.querySelector('[data-settings-cancel]').addEventListener('click', () => {
-    document.querySelector('[data-settings-overlay]').open = false
-})
+    {'[data-search-cancel]': ['[data-search-overlay]',false]},
+    {'[data-settings-cancel]':['[data-settings-overlay]',false]},
+    {'[data-header-settings]':['[data-settings-overlay]',true]},
+    {'[data-list-close]':['[data-list-active]',false]},
+]
+
+ //for loop to call openModal for each object in targetElements
+ targetElements.forEach((item)=>{openModal(item)})
 
 document.querySelector('[data-header-search]').addEventListener('click', () => {
-    document.querySelector('[data-search-overlay]').open = true 
+    document.querySelector('[data-search-overlay]').open = true
     document.querySelector('[data-search-title]').focus()
-})
-
-document.querySelector('[data-header-settings]').addEventListener('click', () => {
-    document.querySelector('[data-settings-overlay]').open = true 
-})
-
-document.querySelector('[data-list-close]').addEventListener('click', () => {
-    document.querySelector('[data-list-active]').open = false
 })
 
 document.querySelector('[data-settings-form]').addEventListener('submit', (event) => {
@@ -148,29 +95,9 @@ document.querySelector('[data-search-form]').addEventListener('submit', (event) 
     }
 
     document.querySelector('[data-list-items]').innerHTML = ''
-    const newItems = document.createDocumentFragment()
 
-    for (const { author, id, image, title } of result.slice(0, BOOKS_PER_PAGE)) {
-        const element = document.createElement('button')
-        element.classList = 'preview'
-        element.setAttribute('data-preview', id)
+    displayBooks(matches)
     
-        element.innerHTML = `
-            <img
-                class="preview__image"
-                src="${image}"
-            />
-            
-            <div class="preview__info">
-                <h3 class="preview__title">${title}</h3>
-                <div class="preview__author">${authors[author]}</div>
-            </div>
-        `
-
-        newItems.appendChild(element)
-    }
-
-    document.querySelector('[data-list-items]').appendChild(newItems)
     document.querySelector('[data-list-button]').disabled = (matches.length - (page * BOOKS_PER_PAGE)) < 1
 
     document.querySelector('[data-list-button]').innerHTML = `
